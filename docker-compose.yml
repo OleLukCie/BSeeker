@@ -1,0 +1,15 @@
+services:
+  bseeker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bseeker
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    tty: true
+    stdin_open: true

@@ -1,5 +1,5 @@
 # BSeeker\database\db.py
-# J.C.  2026.5.14
+# J.C.  2026.5.18
 
 import os
 import sqlite3
@@ -185,7 +185,7 @@ def get_stats():
     Get overall statistics for the book database.
 
     Returns:
-        dict: Total books, average price, average rating, top categories, top publishers
+        dict: Total books, average price, average rating, category count, top categories, top publishers
     '''
     conn = get_connection()
     cursor = conn.cursor()
@@ -210,6 +210,10 @@ def get_stats():
     cursor.execute('SELECT publisher, COUNT(*) as count FROM books WHERE publisher != "" GROUP BY publisher ORDER BY count DESC LIMIT 10')
     publishers = [dict(row) for row in cursor.fetchall()]
 
+    # Category count (distinct non-empty categories)
+    cursor.execute('SELECT COUNT(DISTINCT category) as category_count FROM books WHERE category IS NOT NULL AND category != ""')
+    category_count = cursor.fetchone()['category_count']
+
     conn.close()
 
     # Return formatted statistics
@@ -217,6 +221,7 @@ def get_stats():
         'total_books': total,
         'avg_price': round(avg_price, 2) if avg_price else 0,
         'avg_rating': round(avg_rating, 2) if avg_rating else 0,
+        'category_count': category_count,
         'top_categories': categories,
         'top_publishers': publishers
     }

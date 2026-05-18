@@ -24,6 +24,10 @@ Targeted crawling of core book information from e-commerce platforms:
 - Rating Score
 - Sales Volume
 
+**Books to Scrape** ([books.toscrape.com](https://books.toscrape.com)) is a **fake book e‑commerce website** built exclusively for **web scraping practice**.
+
+It is **not a real online bookstore** and does not sell actual books. The site contains 1000 fictional books with complete information such as titles, prices, star ratings, categories, stock status and detailed pages.
+
 ## Core Features
 
 - Efficient multi-page data crawling, deduplication and data cleaning via Scrapy

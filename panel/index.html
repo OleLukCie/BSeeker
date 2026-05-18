@@ -34,6 +34,7 @@
         .btn { background: #667eea; color: white; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; margin-bottom: 20px; }
         .btn:hover { background: #5a6fd6; }
         .loading { text-align: center; padding: 40px; color: #999; }
+        .empty-tip { text-align: center; padding: 40px; color: #999; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -121,12 +122,12 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    $('#totalBooks').text(data.total_books);
-                    $('#avgPrice').text('£' + data.avg_price);
-                    $('#avgRating').text(data.avg_rating);
-                    $('#categoryCount').text(data.top_categories.length);
-                    renderCategoryChart(data.top_categories);
-                    renderPublisherChart(data.top_publishers);
+                    $('#totalBooks').text(data.total_books || 0);
+                    $('#avgPrice').text(data.avg_price || '-');
+                    $('#avgRating').text(data.avg_rating || '-');
+                    $('#categoryCount').text(data.category_count || 0);
+                    renderCategoryChart(data.top_categories || []);
+                    renderPublisherChart(data.top_publishers || []);
                 },
                 error: function() {
                     $('#totalBooks, #avgPrice, #avgRating, #categoryCount').text('Error');
@@ -138,7 +139,7 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    renderPriceChart(data);
+                    renderPriceChart(data || []);
                 }
             });
 
@@ -147,7 +148,7 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    renderRatingChart(data);
+                    renderRatingChart(data || []);
                 }
             });
 
@@ -156,12 +157,16 @@
                 method: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    renderTable(data);
+                    renderTable(data || []);
                 }
             });
         }
 
         function renderPriceChart(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('priceChart').innerHTML = '<div class="empty-tip">暂无数据</div>';
+                return;
+            }
             const option = {
                 tooltip: { trigger: 'axis' },
                 xAxis: { type: 'category', data: data.map(d => d.range) },
@@ -172,10 +177,14 @@
                     itemStyle: { color: '#667eea', borderRadius: [4, 4, 0, 0] }
                 }]
             };
-            priceChart.setOption(option);
+            priceChart.setOption(option, true);
         }
 
         function renderRatingChart(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('ratingChart').innerHTML = '<div class="empty-tip">暂无数据</div>';
+                return;
+            }
             const option = {
                 tooltip: { trigger: 'axis' },
                 xAxis: { type: 'category', data: data.map(d => d.rating) },
@@ -186,10 +195,14 @@
                     itemStyle: { color: '#f39c12', borderRadius: [4, 4, 0, 0] }
                 }]
             };
-            ratingChart.setOption(option);
+            ratingChart.setOption(option, true);
         }
 
         function renderCategoryChart(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('categoryChart').innerHTML = '<div class="empty-tip">暂无数据</div>';
+                return;
+            }
             const option = {
                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                 grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
@@ -201,10 +214,14 @@
                     itemStyle: { color: '#2ecc71', borderRadius: [0, 4, 4, 0] }
                 }]
             };
-            categoryChart.setOption(option);
+            categoryChart.setOption(option, true);
         }
 
         function renderPublisherChart(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('publisherChart').innerHTML = '<div class="empty-tip">暂无数据</div>';
+                return;
+            }
             const option = {
                 tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
                 grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
@@ -216,19 +233,23 @@
                     itemStyle: { color: '#e74c3c', borderRadius: [0, 4, 4, 0] }
                 }]
             };
-            publisherChart.setOption(option);
+            publisherChart.setOption(option, true);
         }
 
         function renderTable(data) {
             const tbody = $('#booksTable tbody');
             tbody.empty();
+            if (!data || data.length === 0) {
+                tbody.append('<tr><td colspan="7" class="empty-tip">暂无数据</td></tr>');
+                return;
+            }
             data.forEach(function(book) {
                 const row = '<tr>' +
-                    '<td>' + book.id + '</td>' +
+                    '<td>' + (book.id || '-') + '</td>' +
                     '<td>' + (book.title || '-') + '</td>' +
                     '<td>' + (book.author || '-') + '</td>' +
                     '<td>' + (book.publisher || '-') + '</td>' +
-                    '<td class="price">£' + (book.price || 0).toFixed(2) + '</td>' +
+                    '<td class="price">' + (book.price || '£0.00') + '</td>' +
                     '<td class="rating">' + (book.rating || 0) + '</td>' +
                     '<td>' + (book.category || '-') + '</td>' +
                     '</tr>';
